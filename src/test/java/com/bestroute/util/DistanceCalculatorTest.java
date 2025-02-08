@@ -12,7 +12,7 @@ class DistanceCalculatorTest {
         GeoLocation loc2 = new GeoLocation(12.9352, 77.6245);
 
         double distance = DistanceCalculator.haversineDistance(loc1, loc2);
-        assertTrue(distance > 0);
+        assertEquals(5.1846518448572665,distance);
     }
 
     @Test
@@ -21,6 +21,6 @@ class DistanceCalculatorTest {
         GeoLocation loc2 = new GeoLocation(12.9352, 77.6245);
 
         double time = DistanceCalculator.travelTime(loc1, loc2);
-        assertTrue(time > 0);
+        assertEquals(0.2592325922428633, time);
     }
 }

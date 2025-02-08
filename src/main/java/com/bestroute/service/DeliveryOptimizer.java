@@ -3,26 +3,50 @@ package com.bestroute.service;
 import com.bestroute.model.*;
 import com.bestroute.util.DistanceCalculator;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 public class DeliveryOptimizer {
 
-    public static double calculateDeliveryTime(GeoLocation start, Order order1, Order order2) {
-        double travelToR1 = DistanceCalculator.travelTime(start, order1.getRestaurant().getLocation());
-        double travelToR2 = DistanceCalculator.travelTime(start, order2.getRestaurant().getLocation());
+    public static double calculateOptimizedDeliveryTime(GeoLocation start, List<Order> orders) {
+        if (orders.isEmpty()) return 0;
 
-        double prepTime1 = order1.getRestaurant().getPreparationTime();
-        double prepTime2 = order2.getRestaurant().getPreparationTime();
+        List<Restaurant> restaurants = new ArrayList<>();
+        for (Order order : orders) {
+            restaurants.add(order.getRestaurant());
+        }
 
-        // Choose optimal pickup order
-        boolean pickR1First = (Math.max(travelToR1, prepTime1) <= Math.max(travelToR2, prepTime2));
-        Order firstOrder = pickR1First ? order1 : order2;
-        Order secondOrder = pickR1First ? order2 : order1;
+        restaurants.sort(Comparator.comparingDouble(r ->
+                Math.max(DistanceCalculator.travelTime(start, r.getLocation()), r.getPreparationTime())
+        ));
 
-        double pickupTimeFirst = Math.max(DistanceCalculator.travelTime(start, firstOrder.getRestaurant().getLocation()), firstOrder.getRestaurant().getPreparationTime());
-        double pickupTimeSecond = Math.max(DistanceCalculator.travelTime(firstOrder.getRestaurant().getLocation(), secondOrder.getRestaurant().getLocation()), secondOrder.getRestaurant().getPreparationTime());
+        double currentTime = 0;
+        GeoLocation currLocation = start;
 
-        double deliveryTime1 = DistanceCalculator.travelTime(firstOrder.getRestaurant().getLocation(), firstOrder.getConsumer().getLocation());
-        double deliveryTime2 = DistanceCalculator.travelTime(secondOrder.getRestaurant().getLocation(), secondOrder.getConsumer().getLocation());
+        for (Restaurant restaurant : restaurants) {
+            double travelTime = DistanceCalculator.travelTime(currLocation, restaurant.getLocation());
+            currentTime += travelTime;
+            currentTime = Math.max(currentTime, restaurant.getPreparationTime());
+            currLocation = restaurant.getLocation();
+        }
 
-        return pickupTimeFirst + pickupTimeSecond + deliveryTime1 + deliveryTime2;
+        List<Consumer> consumers = new ArrayList<>();
+        for (Order order : orders) {
+            consumers.add(order.getConsumer());
+        }
+
+        final GeoLocation lastLocation = currLocation;
+
+        consumers.sort(Comparator.comparingDouble(c ->
+                DistanceCalculator.travelTime(lastLocation, c.getLocation())
+        ));
+
+        for (Consumer consumer : consumers) {
+            currentTime += DistanceCalculator.travelTime(currLocation, consumer.getLocation());
+            currLocation = consumer.getLocation();
+        }
+
+        return currentTime;
     }
 }

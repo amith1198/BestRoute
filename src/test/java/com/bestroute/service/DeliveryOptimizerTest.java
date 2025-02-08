@@ -3,21 +3,28 @@ package com.bestroute.service;
 import com.bestroute.model.*;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.Arrays;
+import java.util.List;
 
 class DeliveryOptimizerTest {
 
     @Test
-    void testCalculateDeliveryTime() {
+    void testCalculateOptimizedDeliveryTime() {
         GeoLocation start = new GeoLocation(12.9716, 77.5946);
-        Restaurant restaurant1 = new Restaurant("R1", new GeoLocation(12.9352, 77.6245), 15.0);
-        Restaurant restaurant2 = new Restaurant("R2", new GeoLocation(12.9600, 77.6100), 20.0);
-        Consumer consumer1 = new Consumer("C1", new GeoLocation(12.9200, 77.6100));
-        Consumer consumer2 = new Consumer("C2", new GeoLocation(12.9900, 77.6400));
+        Restaurant r1 = new Restaurant("R1", new GeoLocation(12.9352, 77.6245), 15.0);
+        Restaurant r2 = new Restaurant("R2", new GeoLocation(12.9600, 77.6100), 20.0);
+        Restaurant r3 = new Restaurant("R3", new GeoLocation(12.9200, 77.5800), 10.0);
+        Consumer c1 = new Consumer("C1", new GeoLocation(12.9900, 77.6400));
+        Consumer c2 = new Consumer("C2", new GeoLocation(12.8000, 77.6700));
+        Consumer c3 = new Consumer("C3", new GeoLocation(12.9100, 77.6000));
 
-        Order order1 = new Order("O1", restaurant1, consumer1);
-        Order order2 = new Order("O2", restaurant2, consumer2);
+        List<Order> orders = Arrays.asList(
+                new Order("O1", r1, c1),
+                new Order("O2", r2, c2),
+                new Order("O3", r3, c3)
+        );
 
-        double deliveryTime = DeliveryOptimizer.calculateDeliveryTime(start, order1, order2);
-        assertTrue(deliveryTime > 0);
+        double deliveryTime = DeliveryOptimizer.calculateOptimizedDeliveryTime(start, orders);
+        assertEquals(21.447375788324173, deliveryTime);
     }
 }
