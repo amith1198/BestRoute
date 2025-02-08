@@ -1,6 +1,8 @@
 package com.bestroute.service;
 
 import com.bestroute.model.*;
+import com.bestroute.util.DistanceCalculator;
+import com.bestroute.util.HaversineDistanceCalculator;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
@@ -24,7 +26,10 @@ class DeliveryOptimizerTest {
                 new Order("O3", r3, c3)
         );
 
-        double deliveryTime = DeliveryOptimizer.calculateOptimizedDeliveryTime(start, orders);
+        DistanceCalculator distanceCalculator = new HaversineDistanceCalculator();
+        DeliveryOptimizer deliveryOptimizer = new DeliveryOptimizer(distanceCalculator);
+
+        double deliveryTime = deliveryOptimizer.calculateOptimizedDeliveryTime(start, orders);
         assertEquals(21.447375788324173, deliveryTime);
     }
 }

@@ -5,6 +5,8 @@ import com.bestroute.model.GeoLocation;
 import com.bestroute.model.Order;
 import com.bestroute.model.Restaurant;
 import com.bestroute.service.DeliveryOptimizer;
+import com.bestroute.util.DistanceCalculator;
+import com.bestroute.util.HaversineDistanceCalculator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,10 @@ public class Main {
         orders.add(new Order("O1", restaurant1, consumer1));
         orders.add(new Order("O2", restaurant2, consumer2));
 
-        double optimizedTime = DeliveryOptimizer.calculateOptimizedDeliveryTime(driverStart, orders);
+        DistanceCalculator distanceCalculator = new HaversineDistanceCalculator();
+        DeliveryOptimizer deliveryOptimizer = new DeliveryOptimizer(distanceCalculator);
+
+        double optimizedTime = deliveryOptimizer.calculateOptimizedDeliveryTime(driverStart, orders);
 
         System.out.println("Optimized Delivery Time: " + optimizedTime + " minutes");
     }

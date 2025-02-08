@@ -9,7 +9,13 @@ import java.util.List;
 
 public class DeliveryOptimizer {
 
-    public static double calculateOptimizedDeliveryTime(GeoLocation start, List<Order> orders) {
+    private final DistanceCalculator distanceCalculator;
+
+    public DeliveryOptimizer(DistanceCalculator distanceCalculator) {
+        this.distanceCalculator = distanceCalculator;
+    }
+
+    public double calculateOptimizedDeliveryTime(GeoLocation start, List<Order> orders) {
         if (orders.isEmpty()) return 0;
 
         List<Restaurant> restaurants = new ArrayList<>();
@@ -18,14 +24,14 @@ public class DeliveryOptimizer {
         }
 
         restaurants.sort(Comparator.comparingDouble(r ->
-                Math.max(DistanceCalculator.travelTime(start, r.getLocation()), r.getPreparationTime())
+                Math.max(distanceCalculator.travelTime(start, r.getLocation()), r.getPreparationTime())
         ));
 
         double currentTime = 0;
         GeoLocation currLocation = start;
 
         for (Restaurant restaurant : restaurants) {
-            double travelTime = DistanceCalculator.travelTime(currLocation, restaurant.getLocation());
+            double travelTime = distanceCalculator.travelTime(currLocation, restaurant.getLocation());
             currentTime += travelTime;
             currentTime = Math.max(currentTime, restaurant.getPreparationTime());
             currLocation = restaurant.getLocation();
@@ -39,11 +45,11 @@ public class DeliveryOptimizer {
         final GeoLocation lastLocation = currLocation;
 
         consumers.sort(Comparator.comparingDouble(c ->
-                DistanceCalculator.travelTime(lastLocation, c.getLocation())
+                distanceCalculator.travelTime(lastLocation, c.getLocation())
         ));
 
         for (Consumer consumer : consumers) {
-            currentTime += DistanceCalculator.travelTime(currLocation, consumer.getLocation());
+            currentTime += distanceCalculator.travelTime(currLocation, consumer.getLocation());
             currLocation = consumer.getLocation();
         }
 
